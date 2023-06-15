@@ -61,11 +61,30 @@ app.get("/", (req,res) => {
 });
 
 app.get("/persons", (req,res) => {
-  res.json(persons);
+  res.status(200).json(persons);
+})
+
+// This section returns the phrase below along with the number of people in persons arr
+app.get("/info", (req,res) => {
+  res.send(`<p>Phonebook has info for <strong>${persons.length}</strong> people.</p>`);
+})
+
+app.get("/persons/:id", (req,res) => {
+  const id = parseInt(req.params.id);
+  const person = persons.find((person) => person.id === id);
+
+  res.json(person);
+})
+
+app.delete("/persons/:id", (req,res) => {
+  const id = parseInt(req.params.id);
+  persons = persons.filter((person) => person.id === id);
+
+  res.status(204).end();
 })
 
 app.get("/api/notes", (req,res) => {
-  res.json(notes);
+  res.status(200).json(notes);
 })
 
 app.get("/api/notes/:id", (req,res) => {
