@@ -69,6 +69,10 @@ app.get("/info", (req,res) => {
   res.send(`<p>Phonebook has info for <strong>${persons.length}</strong> people.</p>`);
 })
 
+app.get("/persons", (req,res) => {
+  res.status(200).json(persons);
+})
+
 app.get("/persons/:id", (req,res) => {
   const id = parseInt(req.params.id);
   const person = persons.find((person) => person.id === id);
@@ -76,9 +80,31 @@ app.get("/persons/:id", (req,res) => {
   res.json(person);
 })
 
+app.post("/persons", (req,res) => {
+  const { name, number } = req.body
+  if (!name || !number) {
+    return res.status(400).json({error: "Missing name or number!"})
+  }
+
+  const nameExists = persons.some((person) => person.name === name);
+
+  if (nameExists) {
+    return res.status(400).json({error: "Oops! Name must be unique!"})
+  }
+
+  const person = {
+    id: uuidv4(),
+    name,
+    number
+  }
+  
+  persons = persons.concat(person)
+  res.status(201).json(person)
+})
+
 app.delete("/persons/:id", (req,res) => {
   const id = parseInt(req.params.id);
-  persons = persons.filter((person) => person.id === id);
+  persons = persons.filter((person) => person.id !== id);
 
   res.status(204).end();
 })
@@ -118,6 +144,22 @@ app.post("/api/notes", (req,res) => {
   notes = notes.concat(note);
 
   res.status(201).json(note);
+})
+
+app.put("/api/notes/:id", (req,res) => {
+  const id = parseInt(req.params.id);
+  const note = notes.find((note) => note.id === id);
+  const { content, important } = req.body
+
+  const updateNote = {
+    ...note,
+    content,
+    important
+  }
+
+  notes = notes.map((note) => (note.id === id ? updateNote : note));
+
+  res.status(201).json(updateNote);
 })
 
 app.listen(3000, () => {
